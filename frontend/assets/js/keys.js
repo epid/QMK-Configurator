@@ -270,6 +270,21 @@ var KEYS = [
     ]
   },
   {
+    label: 'Space Cadet Shift',
+    cssClass: 'extra-large-context-key',
+    updateType: 'primary',
+    visible: ['normal'],
+    keys: [
+      {value: 'LSPO', display: 'L Shift', tooltip: 'Left Shift when held, ( when tapped'},
+      {value: 'RSPC', display: 'R Shift', tooltip: 'Right Shift when held, ) when tapped'},
+      {value: 'LCPO', display: 'L Ctrl', tooltip: 'Left Control when held, ( when tapped'},
+      {value: 'RCPC', display: 'R Ctrl', tooltip: 'Right Control when held, ) when tapped'},
+      {value: 'LAPO', display: 'L Alt', tooltip: 'Left Alt when held, ( when tapped'},
+      {value: 'RAPC', display: 'R Alt', tooltip: 'Right Alt when held, ) when tapped'},
+      {value: 'SFTENT', display: 'Shift Enter', tooltip: 'Right Shift when held, Enter when tapped'}
+    ]
+  },
+  {
     label: 'Power Keys',
     cssClass: 'extra-large-context-key',
     updateType: 'primary',
@@ -383,7 +398,9 @@ var KEYS = [
           {value: 'LCAG', display: 'Lcag'},
           {value: 'ALTG', display: 'Altg'},
           {value: 'SCMD', display: 'Scmd'},
-          {value: 'LCA', display: 'Lca'}
+          {value: 'LCA', display: 'Lca'},
+          {value: 'LSA', display: 'Lsa'},
+          {value: 'RSA', display: 'Rsa'}
       ]
   },
   {
@@ -398,7 +415,9 @@ var KEYS = [
           {value: 'RCAG', display: 'Rcag'},
           {value: 'ALL', display: 'All'},
           {value: 'SCMD', display: 'Scmd'},
-          {value: 'LCA', display: 'Lca'}
+          {value: 'LCA', display: 'Lca'},
+          {value: 'LSA', display: 'Lsa'},
+          {value: 'RSA', display: 'Rsa'}
       ]
   }
 ];
