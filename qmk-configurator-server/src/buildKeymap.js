@@ -100,7 +100,7 @@ const generateIndicatorTemplate = (indicators) => {
   }
 
   return (
-`void process_indicator_update(uint32_t state, uint8_t usb_led) {
+`void process_indicator_update(layer_state_t state, uint8_t usb_led) {
   for (int i = 0; i < ${indicators.length}; i++) {
     setrgb(0, 0, 0, (LED_TYPE *)&led[i]);
   }
@@ -121,9 +121,9 @@ void led_set_user(uint8_t usb_led) {
   process_indicator_update(layer_state, host_keyboard_leds());
 };
 
-uint32_t layer_state_set_user(uint32_t state) {
+layer_state_t layer_state_set_user(layer_state_t state) {
   process_indicator_update(state, host_keyboard_leds());
-  return state;
+    return state;
 };`);
 };
 
@@ -133,7 +133,7 @@ const generateStaticIndicatorTemplate = (indicators) => {
   }
 
   return (
-`void process_indicator_update(uint32_t state, uint8_t usb_led) {
+`void process_indicator_update(layer_state_t state, uint8_t usb_led) {
   ${indicators.map((led, ledIndex) => {
     switch (led.type) {
       case 'layer':
@@ -174,13 +174,68 @@ void led_set_user(uint8_t usb_led) {
   process_indicator_update(layer_state, host_keyboard_leds());
 };
 
-uint32_t layer_state_set_user(uint32_t state) {
+layer_state_t layer_state_set_user(layer_state_t state) {
   process_indicator_update(state, host_keyboard_leds());
   return state;
 };`);
 };
 
-module.exports = (keyData, indicators, staticIndicators, firmwareDirectory) => {
+const processEncoderActions = actions => {
+  if (actions.length < 1) {
+    return '';
+  }
+  if (actions.length === 1) {
+    return `    if (clockwise) {
+        tap_code(${actions[0].right});
+      } else {
+        tap_code(${actions[0].left});
+      }`;
+  }
+  let defaultAction = actions.splice(0, 1);
+  let start = true;
+  let convertedActions = actions.map((action, index) => {
+    if (action.right === 'TRNS' || action.left === 'TRNS') {
+      return '';
+    }
+
+    let retVal = `    ${start ? 'if' : 'else if'} (layer_state & (1<<${index + 1})) {
+      if (clockwise) {
+        tap_code(${action.right});
+      } else {
+        tap_code(${action.left});
+      }
+    }`;
+    start = false;
+    return retVal;
+  });
+  convertedActions.push(`    else {
+      if (clockwise) {
+        tap_code(${defaultAction[0].right});
+      } else {
+        tap_code(${defaultAction[0].left});
+      }
+    }`);
+
+  return convertedActions.join('\n');
+};
+
+const processEncoder = (encoder, index) => {
+    return `if (index == ${index}) {
+  ${processEncoderActions(encoder.actions)}
+}`;
+};
+
+const generateRotaryEncoderTemplate = rotaryEncoders => {
+  if (!rotaryEncoders || rotaryEncoders.length === 0) {
+    return '';
+  }
+
+  return `void encoder_update_user(uint8_t index, bool clockwise) {
+  ${rotaryEncoders.map(processEncoder).join('\n')}
+}`;
+};
+
+module.exports = (keyData, indicators, staticIndicators, rotaryEncoders, firmwareDirectory) => {
   const layers = keyData.map((layer) => {
     return layer.map((row) => {
       return row.map((key) => {
@@ -218,5 +273,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 ${generateIndicatorTemplate(indicators)}
-${generateStaticIndicatorTemplate(staticIndicators)}`);
+${generateStaticIndicatorTemplate(staticIndicators)}
+${generateRotaryEncoderTemplate(rotaryEncoders)}`);
 };

@@ -12,7 +12,16 @@ const populateDefines = (config) => {
   if (!config.actionOneShotEnabled) { defines.push('#define NO_ACTION_ONESHOT'); }
   if (!config.actionMacroEnabled) { defines.push('#define NO_ACTION_MACRO'); }
   if (!config.actionFunctionEnabled) { defines.push('#define NO_ACTION_FUNCTION'); }
+  if (config.portscan) {
+    defines.push(`#define PORTSCAN ${config.portscan}`);
+    defines.push(`#define PORTSCAN_PINS ${config.portscanPins || 255}`);
+  }
+  if (config.multiplexPins) {
+    defines.push(`#define MULTIPLEX_PINS { ${config.multiplexPins.join(', ')} }`);
+    defines.push(`#define MULTIPLEX ${config.multiplexPins.length}`);
+  }
   if (config.rgbDiPin) { defines.push(`#define RGB_DI_PIN ${config.rgbDiPin}`); }
+  if (config.rgbDiPin && config.rgblightLimitValue) { defines.push(`#define RGBLIGHT_LIMIT_VAL ${config.rgblightLimitValue}`); }
   if (config.rgbLedNum) { defines.push( `#define RGBLED_NUM ${config.rgbLedNum}
 #define RGBLIGHT_ANIMATIONS
 #define RGBLIGHT_SLEEP`); }
@@ -24,7 +33,7 @@ ${config.commandKeyCombination || 'keyboard_report->mods == (MOD_BIT(KC_LSHIFT) 
 `)}`;
 };
 
-module.exports = (config) => {
+module.exports = (config, rotaryEncoders) => {
   return (
 `#ifndef CONFIG_H
 #define CONFIG_H
@@ -41,7 +50,9 @@ module.exports = (config) => {
 #define MATRIX_COLS ${config.matrixColumnPins.length}
 #define MATRIX_ROW_PINS { ${config.matrixRowPins.join(', ')} }
 #define MATRIX_COL_PINS { ${config.matrixColumnPins.join(', ')} }
-#define UNUSED_PINS
+
+${rotaryEncoders ? `#define ENCODERS_PAD_A { ${rotaryEncoders.map(encoder => encoder.pinA).join(', ')} }` : ''}
+${rotaryEncoders ? `#define ENCODERS_PAD_B { ${rotaryEncoders.map(encoder => encoder.pinB).join(', ')} }` : ''}
 
 #define DIODE_DIRECTION ${config.diodeDirection}
 
